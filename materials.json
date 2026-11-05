@@ -1,25 +1,4 @@
 {
-  "title": "Material meiner Klasse",
-  "items": [
-    {
-      "id": "1",
-      "title": "Beispiel: Arbeitsblatt (bitte löschen)",
-      "cat": "Allgemein",
-      "desc": "So sieht ein Eintrag aus. Lösche ihn in der Verwaltung und füge dein eigenes Material hinzu.",
-      "file": "",
-      "link": "",
-      "date": "2026-11-05",
-      "due": ""
-    },
-    {
-      "id": "1793907614047",
-      "title": "Test",
-      "cat": "Mathe",
-      "desc": "Dies ist eine Testdatei.",
-      "file": "dateien/Taktik im Hallenhockey 2.pdf",
-      "link": "",
-      "date": "2026-11-05",
-      "due": ""
-    }
-  ]
+  "title": "Materialien - Klasse 05A",
+  "items": []
 }
