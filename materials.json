@@ -1,4 +1,25 @@
 {
   "title": "Materialien - Klasse 05A",
-  "items": []
+  "items": [
+    {
+      "id": "1793908753306",
+      "title": "Buchliste - Klasse 05A",
+      "cat": "Allgemein",
+      "desc": "",
+      "file": "dateien/Buchliste_5.pdf",
+      "link": "",
+      "date": "2026-11-05",
+      "due": ""
+    },
+    {
+      "id": "1793908771092",
+      "title": "Stundenplan - Klasse 05A",
+      "cat": "Allgemein",
+      "desc": "",
+      "file": "dateien/Stundenplan_5a.pdf",
+      "link": "",
+      "date": "2026-11-05",
+      "due": ""
+    }
+  ]
 }
