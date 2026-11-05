@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Material</title>
+<style>
+:root{--bg:#f1f4f3;--tx:#16242a;--mu:#5b6b70;--ac:#0a6b6b;--ln:#cfd9d8;--pn:#e6edec;--new:#f5c542;--late:#b4361f;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#101a1c;--tx:#e6eeee;--mu:#98aaad;--ac:#5fc4c4;--ln:#2a3a3d;--pn:#18262a;--late:#ff8a73;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{max-width:720px;margin:0 auto;padding:24px 16px 48px}
+h1,h2{font-family:Georgia,"Iowan Old Style",serif;font-weight:700}
+h1{font-size:30px;margin:0;line-height:1.15}.sub{color:var(--mu);margin:4px 0 20px}
+h2{font-size:20px;margin:28px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--ac)}
+a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+input,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--ln);padding:9px 10px;width:100%;margin:4px 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip,.acts button{font:inherit;color:var(--tx);background:none;border:1px solid var(--ln);padding:5px 12px;cursor:pointer}
+.chip.on{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+.card{padding:12px 0;border-bottom:1px solid var(--ln)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.card h3{margin:0;font-size:17px}.card p{margin:4px 0;color:var(--mu);white-space:pre-wrap}
+.ext{font-size:12px;border:1px solid var(--ln);padding:0 7px;color:var(--mu)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--mu);align-items:center}
+.tag{padding:0 7px}.tag.new{background:var(--new);color:#16242a}.tag.due{border:1px solid var(--ac);color:var(--ac)}.tag.late{border:1px solid var(--late);color:var(--late)}
+.panel{background:var(--pn);padding:14px;margin:14px 0}.panel h2{margin-top:0;font-size:17px;border:0}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.btn{background:var(--ac)!important;color:var(--bg)!important;border-color:var(--ac)!important}
+.note,.empty{color:var(--mu)}.empty{padding:28px 0}label{display:block;margin-top:6px;font-size:14px}
+footer{margin-top:36px;font-size:13px}
+</style></head><body>
+<div id="app"></div><p id="msg" style="max-width:720px;margin:0 auto;padding:0 16px;color:var(--late)"></p>
+<script>
+const $=s=>document.querySelector(s);
+const h=(t,a={},...k)=>{const e=document.createElement(t);for(const[n,v]of Object.entries(a)){if(n==='on')for(const[x,f]of Object.entries(v))e.addEventListener(x,f);else if(n==='cls')e.className=v;else if(v!==false&&v!=null)e.setAttribute(n,v)}k.flat().forEach(c=>e.append(c instanceof Node?c:document.createTextNode(c??'')));return e};
+let data={title:'Material',items:[]},cat='',q='',edit=location.hash==='#verwalten',editing=null,dirty=false;
+const today=()=>new Date().toISOString().slice(0,10);
+const fd=s=>s?new Date(s+'T12:00').toLocaleDateString('de-DE'):'';
+const ext=it=>{const m=(it.file||'').match(/\.([a-z0-9]+)$/i);return m?m[1].toLowerCase():(it.link?'link':'')};
+const isNew=it=>it.date&&(Date.now()-new Date(it.date+'T12:00'))<7*864e5;
+function render(){
+ document.title=data.title;const root=$('#app');root.replaceChildren();
+ root.append(h('h1',{},data.title),h('p',{cls:'sub'},data.items.length+(data.items.length===1?' Eintrag':' Einträge')));
+ if(edit)root.append(form(),bar());
+ const cats=[...new Set(data.items.map(i=>i.cat||'Allgemein'))];
+ const s=h('input',{type:'search',placeholder:'Material suchen','aria-label':'Material suchen',value:q,on:{input:e=>{q=e.target.value;list()}}});
+ root.append(h('div',{cls:'tools'},s));
+ if(cats.length>1)root.append(h('div',{cls:'chips'},['',...cats].map(c=>h('button',{cls:'chip'+(c===cat?' on':''),on:{click:()=>{cat=c;render()}}},c||'Alle'))));
+ root.append(h('div',{id:'list'}),h('footer',{},h('a',{href:edit?'#':'#verwalten',on:{click:()=>setTimeout(()=>{edit=location.hash==='#verwalten';render()})}},edit?'Verwaltung schließen':'Verwalten')));
+ list();
+}
+function list(){const box=$('#list');box.replaceChildren();
+ const L=data.items.filter(i=>(!cat||(i.cat||'Allgemein')===cat)&&(!q||((i.title||'')+' '+(i.desc||'')).toLowerCase().includes(q.toLowerCase()))).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ if(!L.length){box.append(h('p',{cls:'empty'},data.items.length?'Nichts gefunden. Probiere einen anderen Suchbegriff.':edit?'Noch kein Material. Füge oben den ersten Eintrag hinzu.':'Hier ist noch kein Material. Schau später noch einmal vorbei.'));return}
+ const g={};L.forEach(i=>(g[i.cat||'Allgemein']??=[]).push(i));
+ for(const[n,a]of Object.entries(g))box.append(h('h2',{},n),...a.map(card));
+}
+function card(it){const href=it.file?encodeURI(it.file):it.link;
+ const t=href?h('a',{href,target:'_blank',rel:'noopener'},it.title):it.title;
+ let due='';if(it.due){const d=Math.ceil((new Date(it.due+'T23:59')-Date.now())/864e5);due=h('span',{cls:'tag '+(d<0?'late':'due')},'Abgabe '+fd(it.due)+(d<0?' (vorbei)':d===0?' (heute)':''))}
+ return h('article',{cls:'card'},h('div',{cls:'top'},h('h3',{},t),ext(it)?h('span',{cls:'ext'},ext(it)):''),
+  it.desc?h('p',{},it.desc):'',h('div',{cls:'meta'},it.date?h('span',{},fd(it.date)):'',isNew(it)?h('span',{cls:'tag new'},'neu'):'',due),
+  edit?h('div',{cls:'acts'},h('button',{on:{click:()=>{editing=it.id;render();scrollTo(0,0)}}},'Bearbeiten'),h('button',{on:{click:()=>{if(confirm('Eintrag löschen?')){data.items=data.items.filter(x=>x.id!==it.id);dirty=true;render()}}}},'Löschen')):'')}
+function form(){const it=data.items.find(x=>x.id===editing)||{};const f={};
+ const inp=(k,ph,type='text')=>f[k]=h('input',{type,placeholder:ph,'aria-label':ph,value:it[k]||''});
+ const d=h('textarea',{placeholder:'Beschreibung (optional)',rows:2,'aria-label':'Beschreibung'},it.desc||'');
+ const pick=h('input',{type:'file',on:{change:e=>{const n=e.target.files[0]?.name;if(n)f.file.value='dateien/'+n}}});
+ const save=()=>{if(!f.title.value.trim())return alert('Bitte gib einen Titel ein.');
+  const o={id:it.id||String(Date.now()),title:f.title.value.trim(),cat:f.cat.value.trim()||'Allgemein',desc:d.value.trim(),file:f.file.value.trim(),link:f.link.value.trim(),date:it.date||today(),due:f.due.value};
+  data.items=it.id?data.items.map(x=>x.id===it.id?o:x):[...data.items,o];editing=null;dirty=true;render()};
+ return h('section',{cls:'panel'},h('h2',{},it.id?'Eintrag bearbeiten':'Neuer Eintrag'),inp('title','Titel'),inp('cat','Kategorie, z. B. Mathe'),d,
+  h('label',{},'Datei auswählen (trägt den Pfad ein)',pick),inp('file','Dateipfad, z. B. dateien/arbeitsblatt.pdf'),inp('link','oder Link (optional)','url'),
+  h('label',{},'Abgabe bis (optional)',inp('due','Abgabe','date')),
+  h('div',{cls:'acts'},h('button',{cls:'btn',on:{click:save}},it.id?'Änderung übernehmen':'Hinzufügen'),it.id?h('button',{on:{click:()=>{editing=null;render()}}},'Abbrechen'):''))}
+function bar(){const json=()=>JSON.stringify(data,null,2);
+ return h('section',{cls:'panel'},h('h2',{},'Veröffentlichen'),
+  h('p',{cls:'note'},dirty?'Du hast ungespeicherte Änderungen. Kopiere die Daten und ersetze damit materials.json auf GitHub.':'Änderungen werden erst sichtbar, wenn du materials.json auf GitHub ersetzt.'),
+  h('label',{},'Seitentitel',h('input',{type:'text',value:data.title,on:{change:e=>{data.title=e.target.value.trim()||'Material';dirty=true;render()}}})),
+  h('div',{cls:'acts'},h('button',{cls:'btn',on:{click:async()=>{try{await navigator.clipboard.writeText(json());alert('Kopiert.')}catch(e){prompt('Zum Kopieren markieren:',json())}}}},'JSON kopieren'),
+  h('button',{on:{click:()=>{h('a',{href:URL.createObjectURL(new Blob([json()],{type:'application/json'})),download:'materials.json'}).click()}}},'Als Datei speichern')),
+  h('label',{},'materials.json von deinem Rechner laden',h('input',{type:'file',accept:'.json',on:{change:async e=>{try{const t=await e.target.files[0].text();data=JSON.parse(t);data.items=data.items||[];dirty=false;render()}catch(x){alert('Die Datei ist nicht lesbar.')}}}})))}
+addEventListener('hashchange',()=>{edit=location.hash==='#verwalten';render()});
+(async()=>{try{const r=await fetch('materials.json',{cache:'no-store'});if(!r.ok)throw 0;data=await r.json();data.items=data.items||[]}catch(e){if(location.protocol==='file:')$('#msg').textContent='Lokal geöffnet: Die Daten laden nur über GitHub Pages. In der Verwaltung kannst du materials.json manuell laden.'}render()})();
+</script></body></html>

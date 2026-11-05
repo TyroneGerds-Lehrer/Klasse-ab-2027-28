@@ -1,0 +1,15 @@
+{
+  "title": "Material meiner Klasse",
+  "items": [
+    {
+      "id": "1",
+      "title": "Beispiel: Arbeitsblatt (bitte löschen)",
+      "cat": "Allgemein",
+      "desc": "So sieht ein Eintrag aus. Lösche ihn in der Verwaltung und füge dein eigenes Material hinzu.",
+      "file": "",
+      "link": "",
+      "date": "2026-11-05",
+      "due": ""
+    }
+  ]
+}
